@@ -6,14 +6,14 @@ Provides a wrapper around ripple-lib, and emits additional
 account-specific events.  So you can subscribe to a specific account,
 and get an event whenever a transaction affects that account.
 
-This is a rough, early version.  The interface is going to change!
+This is a rough, early version.  When more stable, I will bump version to 1.x.
 
 ## bin/rcl-monitor.js
 
 The binary is an example of how the library can be used to log
 activity of one or more Ripple wallets.
 
-Currently it saves transactions to /tmp and writes no logs, only debug output.  Soon to change.
+Currently it saves transactions to file and writes only basic log messages.
 
 Usage example:
 
