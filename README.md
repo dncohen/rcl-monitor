@@ -18,6 +18,6 @@ Currently it saves transactions to /tmp and writes no logs, only debug output.  
 Usage example:
 
 ```
-DEBUG=* bin/rcl-monitor.js raDK34VShinWDQBXQctmr8Ck87SUTPsL2A rLWdQ7FayHLH8zs5zn4r2PKmsHP3DR8F6i
+DEBUG=* bin/rcl-monitor.js <address> [<addresses>...]
 ```
 
