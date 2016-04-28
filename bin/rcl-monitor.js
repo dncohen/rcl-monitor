@@ -100,7 +100,7 @@ rcl.on('ledger', ledger => {
   //debug(ledger);
 });
 
-/** 
+/**
  * Maintain a list of tx per ledger.  This will help us keep track of
  * whether this is the first time we've seen a transaction.
  */
@@ -119,7 +119,7 @@ rcl.on('ledger_processed', ledger => {
     // Make sure we have integers an not strings.  (we do)
     //debug(ledgerVersion);
     //debug(ledger);
-    
+
     if (ledgerVersion <= ledger['ledgerVersion']) {
       for (var txid in txByLedger[ledgerVersion]) {
         if (!txByLedger[ledgerVersion].hasOwnProperty(txid)) continue;
@@ -144,62 +144,64 @@ rcl.on('ledger_processed', ledger => {
         if (Object.keys(txByLedger[ledgerVersion]) === 0) {
           delete txByLedger[ledgerVersion];
         }
-        
+
       }
     }
   }
-  
+
 });
 
-var fs = require('fs');
 
-// Subscribe to the addresses we are interested in.
-for (var i = 0; i < commander.args.length; i++) {
-  debug(commander.args[i]);
-  var address = commander.args[i];
-  rcl.addAddress(address);
-  rcl.on(address, (tx, addressEffected) => {
-    //debug(commander.args[i] + " tx:");
-    //debug(tx);
-
-    var filename = sprintf(conf[programName]['tx_filename_format'], tx);
-
-    try {
-      var stat = fs.statSync(filename);
-      if (stat.isFile()) {
-        debug("tx " + filename + " already saved.");
-      }
-      // The file exists.  Consider it already monitored.  Nothing to do.
-      return;
-    }
-    catch(err) {
-      // This means the file does not exist, implying we have not processed the transaction already.  Let's add it to our list, and we will process it.
-      var txLedger = tx['outcome']['ledgerVersion'];
-      var txid = tx['id'];
-      if (!txByLedger.hasOwnProperty(txLedger)) {
-        txByLedger[txLedger] = {};
-      }
-      if (!txByLedger[txLedger].hasOwnProperty(txid)) {
-        debug("seeing tx " + txid + " for the first time.");
-        txByLedger[txLedger][txid] = tx;
-      }
-    }
-
-    // We are seeing this tx for the first time, process it.
-    // In our case, processing is just a log message.
-    if (addressEffected == tx['address']) {
-      console.log("%s %s.%s %s %s %s by %s", tx['outcome']['timestamp'], tx['outcome']['ledgerVersion'], tx['outcome']['indexInLedger'], tx['outcome']['result'], txid, tx['type'], formatAddress(tx['address']));
-    }
-    else {
-      console.log("%s %s.%s %s %s %s by %s affected %s", tx['outcome']['timestamp'], tx['outcome']['ledgerVersion'], tx['outcome']['indexInLedger'], tx['outcome']['result'], txid, tx['type'], formatAddress(tx['address']), formatAddress(addressEffected));
-    }
-
-  });
-}
 
 // Here's where we connect to rippled and start listening.
 rcl.connect().then(() => {
-  debug('Connected and waiting for RCL events.');
+  debug('Connected to RCL, subscribing to address events.');
+
+  // Subscribe to the addresses we are interested in.
+  for (var i = 0; i < commander.args.length; i++) {
+    debug(commander.args[i]);
+    var address = commander.args[i];
+    rcl.addAddress(address);
+    rcl.on(address, (tx, addressEffected) => {
+      //debug(commander.args[i] + " tx:");
+      //debug(tx);
+
+      var filename = sprintf(conf[programName]['tx_filename_format'], tx);
+
+      try {
+        var stat = fs.statSync(filename);
+        if (stat.isFile()) {
+          debug("tx " + filename + " already saved.");
+        }
+        // The file exists.  Consider it already monitored.  Nothing to do.
+        return;
+      }
+      catch(err) {
+        // This means the file does not exist, implying we have not processed the transaction already.  Let's add it to our list, and we will process it.
+        var txLedger = tx['outcome']['ledgerVersion'];
+        var txid = tx['id'];
+        if (!txByLedger.hasOwnProperty(txLedger)) {
+          txByLedger[txLedger] = {};
+        }
+        if (!txByLedger[txLedger].hasOwnProperty(txid)) {
+          debug("seeing tx " + txid + " for the first time.");
+          txByLedger[txLedger][txid] = tx;
+        }
+      }
+
+      // We are seeing this tx for the first time, process it.
+      // In our case, processing is just a log message.
+      if (addressEffected == tx['address']) {
+        console.log("%s %s.%s %s %s %s by %s", tx['outcome']['timestamp'], tx['outcome']['ledgerVersion'], tx['outcome']['indexInLedger'], tx['outcome']['result'], txid, tx['type'], formatAddress(tx['address']));
+      }
+      else {
+        console.log("%s %s.%s %s %s %s by %s affected %s", tx['outcome']['timestamp'], tx['outcome']['ledgerVersion'], tx['outcome']['indexInLedger'], tx['outcome']['result'], txid, tx['type'], formatAddress(tx['address']), formatAddress(addressEffected));
+      }
+
+    });
+  }
+
+
 }).then(() => {
   //debug("Disconnecting...");
   //return rcl.disconnect();
@@ -230,5 +232,3 @@ function formatJSON(json) {
 }
 
 debug("End index.js");
-
-
