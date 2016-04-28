@@ -2,7 +2,7 @@
   "name": "rcl-monitor",
   "version": "0.0.0",
   "description": "Tracks and logs activity on the Ripple Consensus Ledger",
-  "main": "bin/rcl-monitor.js",
+  "main": "lib/rcl-monitor.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
