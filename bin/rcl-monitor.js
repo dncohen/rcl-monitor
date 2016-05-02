@@ -159,13 +159,8 @@ rcl.connect().then(() => {
 
   // Subscribe to the addresses we are interested in.
   for (var i = 0; i < commander.args.length; i++) {
-    debug(commander.args[i]);
     var address = commander.args[i];
-    rcl.addAddress(address);
-    rcl.on(address, (tx, addressEffected) => {
-      //debug(commander.args[i] + " tx:");
-      //debug(tx);
-
+    rcl.on('transaction', (context, tx, addressAffected) => {
       var filename = sprintf(conf[programName]['tx_filename_format'], tx);
 
       try {
@@ -191,14 +186,16 @@ rcl.connect().then(() => {
 
       // We are seeing this tx for the first time, process it.
       // In our case, processing is just a log message.
-      if (addressEffected == tx['address']) {
+      if (addressAffected == tx['address']) {
         console.log("%s %s.%s %s %s %s by %s", tx['outcome']['timestamp'], tx['outcome']['ledgerVersion'], tx['outcome']['indexInLedger'], tx['outcome']['result'], txid, tx['type'], formatAddress(tx['address']));
       }
       else {
-        console.log("%s %s.%s %s %s %s by %s affected %s", tx['outcome']['timestamp'], tx['outcome']['ledgerVersion'], tx['outcome']['indexInLedger'], tx['outcome']['result'], txid, tx['type'], formatAddress(tx['address']), formatAddress(addressEffected));
+        console.log("%s %s.%s %s %s %s by %s affected %s", tx['outcome']['timestamp'], tx['outcome']['ledgerVersion'], tx['outcome']['indexInLedger'], tx['outcome']['result'], txid, tx['type'], formatAddress(tx['address']), formatAddress(addressAffected));
       }
 
     });
+    rcl.addAddress(address, address);
+
   }
 
 
